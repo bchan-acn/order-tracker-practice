@@ -113,3 +113,33 @@ def test_list_all_orders_returns_empty_list_when_no_orders(order_tracker, mock_s
     """Tests that listing orders with an empty storage returns an empty list."""
     # mock_storage.get_all_orders returns {} by default
     assert order_tracker.list_all_orders() == []
+
+
+def test_list_orders_by_status_returns_only_matching_orders(order_tracker, mock_storage):
+    """Tests retrieving only orders with a specific status."""
+    pending = {"order_id": "ORD001", "item_name": "Laptop", "quantity": 1,
+               "customer_id": "CUST001", "status": "pending"}
+    shipped1 = {"order_id": "ORD002", "item_name": "Mouse", "quantity": 2,
+                "customer_id": "CUST002", "status": "shipped"}
+    shipped2 = {"order_id": "ORD003", "item_name": "Keyboard", "quantity": 1,
+                "customer_id": "CUST003", "status": "shipped"}
+    mock_storage.get_all_orders.return_value = {
+        "ORD001": pending, "ORD002": shipped1, "ORD003": shipped2,
+    }
+
+    result = order_tracker.list_orders_by_status("shipped")
+
+    assert len(result) == 2
+    assert shipped1 in result
+    assert shipped2 in result
+    assert pending not in result
+
+
+def test_list_orders_by_status_returns_empty_list_when_no_match(order_tracker, mock_storage):
+    """Tests that an empty list is returned when no order has the given status."""
+    mock_storage.get_all_orders.return_value = {
+        "ORD001": {"order_id": "ORD001", "item_name": "Laptop", "quantity": 1,
+                   "customer_id": "CUST001", "status": "pending"},
+    }
+
+    assert order_tracker.list_orders_by_status("shipped") == []
