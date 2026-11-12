@@ -92,3 +92,24 @@ def test_update_order_status_raises_error_if_not_found(order_tracker, mock_stora
         order_tracker.update_order_status("ORD_MISSING", "shipped")
 
     mock_storage.save_order.assert_not_called()
+
+
+def test_list_all_orders_returns_all_orders(order_tracker, mock_storage):
+    """Tests listing all current orders."""
+    order1 = {"order_id": "ORD001", "item_name": "Laptop", "quantity": 1,
+              "customer_id": "CUST001", "status": "pending"}
+    order2 = {"order_id": "ORD002", "item_name": "Mouse", "quantity": 2,
+              "customer_id": "CUST002", "status": "shipped"}
+    mock_storage.get_all_orders.return_value = {"ORD001": order1, "ORD002": order2}
+
+    result = order_tracker.list_all_orders()
+
+    assert len(result) == 2
+    assert order1 in result
+    assert order2 in result
+
+
+def test_list_all_orders_returns_empty_list_when_no_orders(order_tracker, mock_storage):
+    """Tests that listing orders with an empty storage returns an empty list."""
+    # mock_storage.get_all_orders returns {} by default
+    assert order_tracker.list_all_orders() == []
