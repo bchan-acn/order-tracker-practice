@@ -42,3 +42,26 @@ def test_add_order_raises_error_if_exists(order_tracker, mock_storage):
 
     with pytest.raises(ValueError, match="Order with ID 'ORD_EXISTING' already exists."):
         order_tracker.add_order("ORD_EXISTING", "New Item", 1, "CUST001")
+
+def test_get_order_by_id_returns_existing_order(order_tracker, mock_storage):
+    """Tests fetching an existing order by its ID."""
+    expected = {
+        "order_id": "ORD001",
+        "item_name": "Laptop",
+        "quantity": 1,
+        "customer_id": "CUST001",
+        "status": "pending",
+    }
+    mock_storage.get_order.return_value = expected
+
+    result = order_tracker.get_order_by_id("ORD001")
+
+    assert result == expected
+    mock_storage.get_order.assert_called_once_with("ORD001")
+
+
+def test_get_order_by_id_raises_error_if_not_found(order_tracker, mock_storage):
+    """Tests that fetching a non-existent order raises a ValueError."""
+    # mock_storage.get_order returns None by default (no order found)
+    with pytest.raises(ValueError, match="Order with ID 'ORD_MISSING' not found."):
+        order_tracker.get_order_by_id("ORD_MISSING")
