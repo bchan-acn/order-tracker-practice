@@ -34,7 +34,9 @@ class OrderTracker:
         return order
 
     def update_order_status(self, order_id: str, new_status: str):
-        pass
+        order = self.get_order_by_id(order_id)
+        order["status"] = new_status
+        self.storage.save_order(order_id, order)
 
     def list_all_orders(self):
         pass
